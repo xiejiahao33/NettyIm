@@ -2,21 +2,37 @@ package protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import protocol.request.LoginRequestPacket;
+import protocol.request.MessageRequestPacket;
+import protocol.response.LoginResponsePacket;
+import protocol.response.MessageResponsePacket;
 import serialize.Serializer;
+import serialize.impl.JSONSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static protocol.command.Command.*;
+
 public class PacketCodec {
 
     public static final int MAGIC_NUMBER = 0x12345678;
+    public static final PacketCodec INSTANCE = new PacketCodec();
 
     private final Map<Byte, Class<? extends Packet>> packetTypeMap;
     private final Map<Byte, Serializer> serializerMap;
 
     private PacketCodec() {
         packetTypeMap = new HashMap<>();
+        packetTypeMap.put(LOGIN_REQUEST, LoginRequestPacket.class);
+        packetTypeMap.put(LOGIN_RESPONSE, LoginResponsePacket.class);
+        packetTypeMap.put(MESSAGE_REQUEST, MessageRequestPacket.class);
+        packetTypeMap.put(MESSAGE_RESPONSE, MessageResponsePacket.class);
+
+
         serializerMap = new HashMap<>();
+        Serializer serializer = new JSONSerializer();
+        serializerMap.put(serializer.getSerializerAlgorithm(), serializer);
 
     }
 
