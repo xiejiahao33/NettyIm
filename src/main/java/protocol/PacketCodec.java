@@ -90,6 +90,8 @@ public class PacketCodec {
         return serializerMap.get(serializeAlgorithm);
     }
 
+    //这个Class<? extends Packet> 代表返回的类是一个Packet的子类，
+    //具体通过容器的映射值来说明  packetTypeMap
     private Class<? extends Packet> getRequestType(byte command) {
 
         return packetTypeMap.get(command);
