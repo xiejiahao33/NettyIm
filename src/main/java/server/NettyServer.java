@@ -1,11 +1,15 @@
 package server;
 
+import codec.PacketDecoder;
+import codec.PacketEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import server.handler.FirstServerHandler;
+import server.handler.LoginRequestHandler;
+import server.handler.MessageRequestHandler;
 import server.handler.ServerHandle;
 
 import java.util.Date;
@@ -25,7 +29,10 @@ public class NettyServer {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel ch){
-                        ch.pipeline().addLast(new ServerHandle());
+                        ch.pipeline().addLast(new PacketDecoder());
+                        ch.pipeline().addLast(new LoginRequestHandler());
+                        ch.pipeline().addLast(new MessageRequestHandler());
+                        ch.pipeline().addLast(new PacketEncoder());
                     }
                 });
         bind(serverBootstrap, 8000);

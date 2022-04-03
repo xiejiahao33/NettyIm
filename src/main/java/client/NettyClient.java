@@ -1,6 +1,10 @@
 package client;
 
 import client.handler.ClientHandler;
+import client.handler.LoginResponseHandler;
+import client.handler.MessageResponseHandler;
+import codec.PacketDecoder;
+import codec.PacketEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -11,6 +15,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import protocol.PacketCodec;
 import protocol.request.MessageRequestPacket;
+import protocol.response.LoginResponsePacket;
+import server.handler.LoginRequestHandler;
+import server.handler.MessageRequestHandler;
 import util.LoginUtil;
 
 import java.util.Date;
@@ -36,7 +43,10 @@ public class NettyClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch){
-                        ch.pipeline().addLast(new ClientHandler());
+                        ch.pipeline().addLast(new PacketDecoder());
+                        ch.pipeline().addLast(new LoginResponseHandler());
+                        ch.pipeline().addLast(new MessageResponseHandler());
+                        ch.pipeline().addLast(new PacketEncoder());
                     }
                 });
         //4.建立连接
@@ -47,7 +57,7 @@ public class NettyClient {
     private static void connect(Bootstrap bootstrap, String host, int port, int retry){
         bootstrap.connect(host, port).addListener(future -> {
             if (future.isSuccess()){
-                System.out.println("连接成功");
+                System.out.println("服务器连接成功");
                 Channel channel = ((ChannelFuture)future).channel();
                 startConsoleThread(channel);
             }else if (retry == 0){
